@@ -22,11 +22,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.GridCells
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
@@ -129,8 +132,79 @@ fun PetDetailScreen(navController: NavController, pet: Pet?) {
         backgroundColor = MaterialTheme.colors.background,
     ) {
         if (pet != null) {
+            Column(
+                modifier = Modifier
+                    .padding(24.dp)
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.Start,
+            ) {
+                Image(
+                    painter = painterResource(pet.photo),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .height(200.dp)
+                        .fillMaxWidth()
+                        .weight(1F),
+                    contentScale = ContentScale.Fit
+                )
+
+
+                LazyColumn(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    val textPadding = 8.dp
+                    item {
+                        Text(
+                            text = pet.name,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(textPadding),
+                        )
+                    }
+
+                    item {
+                    Text(
+                        text = pet.id.toString(),
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(textPadding),
+                    )
+                }
+
+                    item {
+                    Text(
+                        text = "${pet.sex.toString().toLowerCase().capitalize()}" +
+                                "/" +
+                                "${if (pet.isSpayedNeutered) "" else "Not "}${if (pet.sex == Sex.FEMALE) "Spayed" else "Nuetered"}",
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(textPadding),
+                    )}
+
+                    item {
+                    Text(
+                        text = pet.breed,
+                        modifier = Modifier.padding(textPadding),
+                        textAlign = TextAlign.Center,
+                        fontSize = 16.sp,
+                    )}
+
+                    item {
+                        if (pet.ageMonth != 0 && pet.ageYear != 0) {
+                            Text(
+                                text = PetUtils.getFormattedAge(pet.ageYear, pet.ageMonth),
+                                fontSize = 16.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(textPadding),
+                            )
+                        }
+                    }
+                }
+
+            }
             // TODO update to not just reuse the PetCard
-            PetCard(pet = pet, onClick = { /*TODO*/ })
+//            PetCard(pet = pet, onClick = { /*TODO*/ })
         } else {
             Text(text = "Pet not found")
         }
@@ -147,14 +221,13 @@ fun PetCard(pet: Pet, onClick: (Int) -> Unit) {
             .clickable { onClick(pet.id) },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // TODO need to make the picture fit a bit better
         Image(
             painter = painterResource(pet.photo),
             contentDescription = null,
             modifier = Modifier
                 .height(200.dp)
                 .fillMaxWidth(),
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.Fit
         )
 
         Text(
@@ -202,24 +275,23 @@ fun PetCard(pet: Pet, onClick: (Int) -> Unit) {
 @Preview
 @Composable
 fun PreviewPetCard() {
-
-    val pet = Pet(id = 113321,
-        photo = R.drawable.animal_dog_pet_cute,
-        name = "Dolly",
-        sex = Sex.FEMALE,
-        isSpayedNeutered = true,
-        breed = "Shepard Mix",
-        ageMonth = 6,
-        ageYear = 6)
-
-    PetCard(pet, {})
+    PetCard(getPreviewPet()) {}
 }
 
 @Preview
 @Composable
 fun PreviewPetListScreen() {
+    PetListScreen(pets = MutableList(14) { getPreviewPet() }, rememberNavController())
+}
 
-    val pet = Pet(id = 113321,
+@Preview
+@Composable
+fun PreviewPetDetailScreen() {
+    PetDetailScreen(pet = getPreviewPet(), navController = rememberNavController())
+}
+
+private fun getPreviewPet(): Pet {
+    return Pet(id = 113321,
         photo = R.drawable.animal_dog_pet_cute,
         name = "Dolly",
         sex = Sex.FEMALE,
@@ -227,7 +299,4 @@ fun PreviewPetListScreen() {
         breed = "Shepard Mix",
         ageMonth = 6,
         ageYear = 6)
-
-    val pets = listOf<Pet>(pet, pet, pet, pet, pet, pet, pet, pet, pet, pet, pet, pet, pet, pet,)
-    PetListScreen(pets = pets, rememberNavController())
 }
